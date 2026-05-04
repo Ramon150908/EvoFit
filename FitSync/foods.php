@@ -171,4 +171,37 @@ function handleUpdateGoals(array $user): never {
     );
 
     jsonResponse(['success' => true]);
+
+// Adicione estas funções no final do arquivo foods.php, antes do fechamento PHP
+
+// ── Buscar Metas ─────────────────────────────────────────────────────
+function handleGetGoals(array $user): never {
+    $goals = Database::fetchOne(
+        'SELECT daily_cal, daily_prot, daily_carb, daily_fat FROM users WHERE id = ?',
+        [$user['id']]
+    );
+    jsonResponse(['goals' => $goals]);
+}
+
+// ── Atualizar Metas ─────────────────────────────────────────────────────
+function handleUpdateGoals(array $user): never {
+    $body = json_decode(file_get_contents('php://input'), true) ?? [];
+
+    $cal  = (int)($body['daily_cal']  ?? 0);
+    $prot = (int)($body['daily_prot'] ?? 0);
+    $carb = (int)($body['daily_carb'] ?? 0);
+    $fat  = (int)($body['daily_fat']  ?? 0);
+
+    if ($cal < 500 || $cal > 10000)   jsonError('Meta de calorias inválida (500–10000).');
+    if ($prot < 10 || $prot > 500)    jsonError('Meta de proteína inválida (10–500g).');
+    if ($carb < 10 || $carb > 1000)   jsonError('Meta de carboidratos inválida (10–1000g).');
+    if ($fat  < 5  || $fat  > 500)    jsonError('Meta de gordura inválida (5–500g).');
+
+    Database::query(
+        'UPDATE users SET daily_cal = ?, daily_prot = ?, daily_carb = ?, daily_fat = ? WHERE id = ?',
+        [$cal, $prot, $carb, $fat, $user['id']]
+    );
+
+    jsonResponse(['success' => true, 'message' => 'Metas atualizadas com sucesso!']);
+}
 }

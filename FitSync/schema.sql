@@ -23,6 +23,16 @@ CREATE TABLE IF NOT EXISTS users (
   created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
+-- Adicionar novas colunas à tabela users
+ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(20) NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS birth_date DATE NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS gender ENUM('male', 'female', 'other', 'prefer_not_to_say') NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS height_cm DECIMAL(5,2) NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS weight_kg DECIMAL(5,2) NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS fitness_goal ENUM('weight_loss', 'muscle_gain', 'maintenance', 'endurance', 'flexibility') NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS activity_level ENUM('sedentary', 'light', 'moderate', 'very_active', 'extra_active') NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
 
 -- ── Alimentos (cache da API USDA + customizados) ──────────────
 CREATE TABLE IF NOT EXISTS foods (

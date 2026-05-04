@@ -327,109 +327,130 @@ $avatar = $dbUser['avatar_url'] ?? null;
 </head>
 <body>
 
-<!-- HEADER -->
-<header>
-    <div class="logo">
-        <?php if (file_exists(__DIR__ . '/assets/icon.png')): ?>
-            <img src="assets/icon.png" alt="FitSync" class="logo-img" />
-        <?php else: ?>
-            <div class="logo-text">Fit<span>Sync</span></div>
-        <?php endif; ?>
-    </div>
-    <div class="header-right">
-        <div class="date-badge" id="dateBadge"></div>
-        <div class="user-badge">
-            <?php if ($avatar): ?>
-                <img class="user-avatar" src="<?= htmlspecialchars($avatar) ?>" alt="<?= $userFirst ?>" />
+  <!-- HEADER -->
+<header class="main-header">
+    <div class="navbar">
+        <div class="logo">
+            <?php if (file_exists(__DIR__ . '/assets/icon.png')): ?>
+                <img src="assets/icon.png" alt="FitSync" class="logo-img" />
             <?php else: ?>
-                <div class="user-initials"><?= $initials ?></div>
+                <div class="logo-text">Fit<span>Sync</span></div>
             <?php endif; ?>
-            <span class="user-name"><?= $userFirst ?></span>
-            <button class="btn-logout" id="btnLogout" title="Sair">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <path d="M9 19l-7-7 7-7"/>
-                  <path d="M16 4v16"/>
-                  <path d="M21 12H10"/>
-              </svg>
-            </button>
         </div>
+        
+        <nav class="nav-tabs" aria-label="Navegação principal">
+            <button class="nav-tab active" data-panel="panelDiary">
+                <span class="tab-icon" aria-hidden="true">📋</span>
+                <span class="tab-label">Diário</span>
+            </button>
+            <button class="nav-tab" data-panel="panelWorkout">
+                <span class="tab-icon" aria-hidden="true">💪</span>
+                <span class="tab-label">Treinos</span>
+            </button>
+            <button class="nav-tab" data-panel="panelHistory">
+                <span class="tab-icon" aria-hidden="true">📈</span>
+                <span class="tab-label">Histórico</span>
+            </button>
+            <button class="nav-tab" data-panel="panelGoals">
+                <span class="tab-icon" aria-hidden="true">🎯</span>
+                <span class="tab-label">Metas</span>
+            </button>
+        </nav>
+        
+       <div class="navbar-right">
+    <time class="date-badge" id="dateBadge" datetime="<?= date('Y-m-d') ?>"></time>
+    
+    <div class="user-badge">
+        <?php if ($avatar): ?>
+            <img class="user-avatar" src="<?= htmlspecialchars($avatar) ?>" alt="Avatar" />
+        <?php else: ?>
+            <div class="user-initials"><?= $initials ?></div>
+        <?php endif; ?>
+        <span class="user-name"><?= $userFirst ?></span>
+        
+        <!-- Botão do Perfil -->
+        <a href="profile.php" class="btn-profile" title="Meu Perfil">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+            </svg>
+        </a>
+        
+        <button class="btn-logout" id="btnLogout" title="Sair">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+        </button>
+    </div>
+</div>
     </div>
 </header>
-
 <div class="container main-content">
-
-  <!-- NAV TABS -->
-  <div class="nav-tabs">
-    <button class="nav-tab active" data-panel="panelDiary">
-      <span class="tab-icon">📋</span>
-      <span class="tab-label">Diário</span>
-    </button>
-    <button class="nav-tab" data-panel="panelWorkout">
-      <span class="tab-icon">💪</span>
-      <span class="tab-label">Treinos</span>
-    </button>
-    <button class="nav-tab" data-panel="panelHistory">
-      <span class="tab-icon">📈</span>
-      <span class="tab-label">Histórico</span>
-    </button>
-    <button class="nav-tab" data-panel="panelGoals">
-      <span class="tab-icon">🎯</span>
-      <span class="tab-label">Metas</span>
-    </button>
-  </div>
 
   <!-- ══════════════ PAINEL: DIÁRIO ══════════════ -->
   <div class="nav-panel active" id="panelDiary">
     <div class="summary-label">Resumo do Dia</div>
-    <div class="summary-cards">
-      <div class="card card-main">
+   <div class="summary-cards">
+    <!-- Card Calorias -->
+    <div class="card card-main">
         <div class="calories-header">
-          <span class="calories-icon">🔥</span>
-          <div>
-            <div class="card-value" id="totalCal">0</div>
-            <div class="card-unit">kcal</div>
-          </div>
+            <span class="calories-icon">🔥</span>
+            <div>
+                <div class="card-value" id="totalCal">0</div>
+                <div class="card-unit">kcal</div>
+            </div>
         </div>
         <div class="card-label">Calorias Consumidas</div>
-        <div class="card-sub" id="calSub">Restam — kcal da meta diária</div>
+        <div class="card-sub" id="calSub">Carregando metas...</div>
         <div class="progress-bar">
-          <div class="progress-fill" id="calProgress" style="width:0%"></div>
+            <div class="progress-fill" id="calProgress" style="width:0%"></div>
         </div>
-      </div>
-      <div class="card macro-card">
+    </div>
+    
+    <!-- Card Proteína -->
+    <div class="card macro-card">
         <div class="macro-header">
-          <span class="macro-icon" style="background:#10b981">💪</span>
-          <span class="macro-name">Proteína</span>
+            <span class="macro-icon" style="background:#10b981">💪</span>
+            <span class="macro-name">Proteína</span>
         </div>
         <div class="card-value" id="totalProt">0</div>
         <div class="card-unit">g</div>
+        <div class="card-sub" id="protSub" style="font-size: 11px; margin-top: 4px;">—</div>
         <div class="progress-bar">
-          <div class="progress-fill" id="protProgress" style="width:0%;background:#10b981"></div>
+            <div class="progress-fill" id="protProgress" style="width:0%;background:#10b981"></div>
         </div>
-      </div>
-      <div class="card macro-card">
+    </div>
+    
+    <!-- Card Carboidratos -->
+    <div class="card macro-card">
         <div class="macro-header">
-          <span class="macro-icon" style="background:#f59e0b">🌾</span>
-          <span class="macro-name">Carboidratos</span>
+            <span class="macro-icon" style="background:#f59e0b">🌾</span>
+            <span class="macro-name">Carboidratos</span>
         </div>
         <div class="card-value" id="totalCarb">0</div>
         <div class="card-unit">g</div>
+        <div class="card-sub" id="carbSub" style="font-size: 11px; margin-top: 4px;">—</div>
         <div class="progress-bar">
-          <div class="progress-fill" id="carbProgress" style="width:0%;background:#f59e0b"></div>
+            <div class="progress-fill" id="carbProgress" style="width:0%;background:#f59e0b"></div>
         </div>
-      </div>
-      <div class="card macro-card">
+    </div>
+    
+    <!-- Card Gordura -->
+    <div class="card macro-card">
         <div class="macro-header">
-          <span class="macro-icon" style="background:#ef4444">🧈</span>
-          <span class="macro-name">Gordura</span>
+            <span class="macro-icon" style="background:#ef4444">🧈</span>
+            <span class="macro-name">Gordura</span>
         </div>
         <div class="card-value" id="totalFat">0</div>
         <div class="card-unit">g</div>
+        <div class="card-sub" id="fatSub" style="font-size: 11px; margin-top: 4px;">—</div>
         <div class="progress-bar">
-          <div class="progress-fill" id="fatProgress" style="width:0%;background:#ef4444"></div>
+            <div class="progress-fill" id="fatProgress" style="width:0%;background:#ef4444"></div>
         </div>
-      </div>
     </div>
+</div>
 
     <div class="search-section">
       <div class="search-section-title">Adicionar Alimento</div>

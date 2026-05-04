@@ -224,34 +224,104 @@ async function loadLogs() {
 
 // Expose for inline scripts
 window.updateSummary = function updateSummary() {
-  const totals = State.logs.reduce((acc, log) => ({
-    cal:  acc.cal  + parseFloat(log.cal  || 0),
-    prot: acc.prot + parseFloat(log.prot || 0),
-    carb: acc.carb + parseFloat(log.carb || 0),
-    fat:  acc.fat  + parseFloat(log.fat  || 0),
-  }), { cal: 0, prot: 0, carb: 0, fat: 0 });
-
-  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-  set('totalCal',  Math.round(totals.cal));
-  set('totalProt', Math.round(totals.prot));
-  set('totalCarb', Math.round(totals.carb));
-  set('totalFat',  Math.round(totals.fat));
-
-  const g = State.goals;
-  const setW = (id, v, m) => {
-    const el = document.getElementById(id);
-    if (el) el.style.width = Math.min(100, (v / (m || 1)) * 100) + '%';
-  };
-  setW('calProgress',  totals.cal,  g.daily_cal  || 2000);
-  setW('protProgress', totals.prot, g.daily_prot || 150);
-  setW('carbProgress', totals.carb, g.daily_carb || 250);
-  setW('fatProgress',  totals.fat,  g.daily_fat  || 65);
-
-  const rem = Math.round((g.daily_cal || 2000) - totals.cal);
-  const calSub = document.getElementById('calSub');
-  if (calSub) calSub.textContent =
-    rem >= 0 ? `Restam ${rem} kcal da meta diária` : `${Math.abs(rem)} kcal acima da meta`;
-}
+    // Calcular totais do dia
+    const totals = State.logs.reduce((acc, log) => ({
+        cal: acc.cal + (parseFloat(log.cal) || 0),
+        prot: acc.prot + (parseFloat(log.prot) || 0),
+        carb: acc.carb + (parseFloat(log.carb) || 0),
+        fat: acc.fat + (parseFloat(log.fat) || 0),
+    }), { cal: 0, prot: 0, carb: 0, fat: 0 });
+    
+    // Arredondar valores
+    totals.cal = Math.round(totals.cal);
+    totals.prot = Math.round(totals.prot * 10) / 10;
+    totals.carb = Math.round(totals.carb * 10) / 10;
+    totals.fat = Math.round(totals.fat * 10) / 10;
+    
+    // Atualizar valores na tela
+    const set = (id, val) => { 
+        const el = document.getElementById(id); 
+        if (el) el.textContent = val; 
+    };
+    set('totalCal', totals.cal);
+    set('totalProt', totals.prot);
+    set('totalCarb', totals.carb);
+    set('totalFat', totals.fat);
+    
+    // Obter metas (usar State.goals que já foi carregado)
+    const goals = State.goals || { daily_cal: 2000, daily_prot: 150, daily_carb: 250, daily_fat: 65 };
+    
+    // Calcular porcentagens e valores restantes
+    const calPercent = Math.min(100, (totals.cal / goals.daily_cal) * 100);
+    const protPercent = Math.min(100, (totals.prot / goals.daily_prot) * 100);
+    const carbPercent = Math.min(100, (totals.carb / goals.daily_carb) * 100);
+    const fatPercent = Math.min(100, (totals.fat / goals.daily_fat) * 100);
+    
+    // Atualizar barras de progresso
+    const setProgress = (id, percent) => {
+        const el = document.getElementById(id);
+        if (el) el.style.width = percent + '%';
+    };
+    setProgress('calProgress', calPercent);
+    setProgress('protProgress', protPercent);
+    setProgress('carbProgress', carbPercent);
+    setProgress('fatProgress', fatPercent);
+    
+    // Calcular e exibir valores restantes
+    const calRemaining = goals.daily_cal - totals.cal;
+    const protRemaining = goals.daily_prot - totals.prot;
+    const carbRemaining = goals.daily_carb - totals.carb;
+    const fatRemaining = goals.daily_fat - totals.fat;
+    
+    // Atualizar texto de calorias restantes
+    const calSub = document.getElementById('calSub');
+    if (calSub) {
+        if (calRemaining >= 0) {
+            calSub.textContent = `🍽️ Restam ${calRemaining} kcal da meta diária`;
+            calSub.style.color = 'var(--gray-500)';
+        } else {
+            calSub.textContent = `⚠️ ${Math.abs(calRemaining)} kcal acima da meta diária`;
+            calSub.style.color = 'var(--danger)';
+        }
+    }
+    
+    // Adicionar informações de macros restantes nos cards
+    const protSub = document.getElementById('protSub');
+    if (protSub) {
+        if (protRemaining >= 0) {
+            protSub.textContent = `Restam ${Math.round(protRemaining)}g`;
+            protSub.style.color = 'var(--gray-500)';
+        } else {
+            protSub.textContent = `${Math.abs(Math.round(protRemaining))}g acima`;
+            protSub.style.color = 'var(--danger)';
+        }
+    }
+    
+    const carbSub = document.getElementById('carbSub');
+    if (carbSub) {
+        if (carbRemaining >= 0) {
+            carbSub.textContent = `Restam ${Math.round(carbRemaining)}g`;
+            carbSub.style.color = 'var(--gray-500)';
+        } else {
+            carbSub.textContent = `${Math.abs(Math.round(carbRemaining))}g acima`;
+            carbSub.style.color = 'var(--danger)';
+        }
+    }
+    
+    const fatSub = document.getElementById('fatSub');
+    if (fatSub) {
+        if (fatRemaining >= 0) {
+            fatSub.textContent = `Restam ${Math.round(fatRemaining)}g`;
+            fatSub.style.color = 'var(--gray-500)';
+        } else {
+            fatSub.textContent = `${Math.abs(Math.round(fatRemaining))}g acima`;
+            fatSub.style.color = 'var(--danger)';
+        }
+    }
+    
+    // Armazenar totais no State para uso futuro
+    State.totals = totals;
+};
 
 // Also assign to local for internal use
 const updateSummary = window.updateSummary;
@@ -374,6 +444,63 @@ document.addEventListener('DOMContentLoaded', async () => {
     toast('Dia limpo! 🗑️');
     await loadLogs();
   });
+
+  // Salvar Metas
+document.getElementById('btnSaveGoals')?.addEventListener('click', async () => {
+    const cal = parseInt(document.getElementById('goalCal').value);
+    const prot = parseInt(document.getElementById('goalProt').value);
+    const carb = parseInt(document.getElementById('goalCarb').value);
+    const fat = parseInt(document.getElementById('goalFat').value);
+    
+    if (!cal || !prot || !carb || !fat) {
+        toast('Preencha todas as metas', true);
+        return;
+    }
+    
+    const payload = {
+        daily_cal: cal,
+        daily_prot: prot,
+        daily_carb: carb,
+        daily_fat: fat
+    };
+    
+    try {
+        const res = await fetch('api/foods.php?action=goals', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            credentials: 'same-origin'
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+            toast('✅ Metas salvas com sucesso!');
+            
+            // Atualizar o State com as novas metas
+            State.goals = {
+                daily_cal: cal,
+                daily_prot: prot,
+                daily_carb: carb,
+                daily_fat: fat
+            };
+            
+            // Atualizar a interface imediatamente
+            updateSummary();
+            
+            // Fechar o modal ou painel de metas se estiver aberto
+            const goalsPanel = document.getElementById('panelGoals');
+            if (goalsPanel && goalsPanel.style.display !== 'none') {
+                // Voltar para o diário
+                document.querySelector('.nav-tab[data-panel="panelDiary"]').click();
+            }
+        } else {
+            toast(data.error || 'Erro ao salvar metas', true);
+        }
+    } catch (err) {
+        toast('Erro de conexão', true);
+    }
+});
 
   // Initial load
   await loadLogs();
